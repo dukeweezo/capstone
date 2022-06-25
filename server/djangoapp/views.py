@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
@@ -15,6 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 # Create your views here.
+
+def profile(request):
+    data = {
+        'name': 'Vitor',
+        'location': 'Finland',
+        'is_active': True,
+        'count': 28
+    }
+    return JsonResponse(data)
 
 def about(request):
     context = {}

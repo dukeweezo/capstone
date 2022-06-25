@@ -2,6 +2,8 @@ from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
 from . import views
+from . import restapis
+
 
 app_name = 'djangoapp'
 urlpatterns = [
@@ -25,6 +27,9 @@ urlpatterns = [
     path('registration/', views.registration_request, name='registration'),
     path(route='about', view=views.about, name='about'),
     path(route='contact', view=views.contact, name='contact'),
+
+    path('api/dealership', restapis.get_dealers_from_cf, name='dealership'),
+
 
     # path for dealer reviews view
 
