@@ -35,9 +35,9 @@ def get_reviews_from_cf(request):
         service.set_service_url(settings.CAPSTONE_URL)
 
         response = service.post_find(
-        db=db_name,
-        selector=selector,
-        fields=["id", "name", "dealership", "review", "purchase", "purchase_date", "car_make", "car_model", "car_year"],
+            db=db_name,
+            selector=selector,
+            fields=["id", "name", "dealership", "review", "purchase", "purchase_date", "car_make", "car_model", "car_year"],
         ).get_result()
 
         if response['docs']:
