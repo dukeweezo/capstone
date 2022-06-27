@@ -39,7 +39,7 @@ class DealerReview:
         self.sentiment = sentiment
 
     def __str__(self):
-        return "Review: " + self.review
+        return "Review: " + self.review + "/n" + "Sentiment: " + str(self.sentiment)
 
 # Create your models here.
 

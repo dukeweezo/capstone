@@ -10,6 +10,8 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from dotenv import dotenv_values
 from django.conf import settings
 from urllib.parse import urlparse, parse_qs
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_watson.natural_language_understanding_v1 import Features, EntitiesOptions, KeywordsOptions
 
 # Create a `get_request` to make HTTP GET requests
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
@@ -23,18 +25,42 @@ import json
 from .models import CarDealer
 from requests.auth import HTTPBasicAuth
 
+def analyze_review_sentiments(dealer_review):
+    """
+    results = get_request(text=dealer_review,
+                url="https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/f2965ae5-49b3-4a48-96fd-4c83a2f0992c",
+                api_key="TwRA5GvEKIaYyM3WxvsmHOkQGgm5qKJBMdL1xlG-T2U9",
+                version="2022-04-07")
+    """
+    authenticator = IAMAuthenticator('TwRA5GvEKIaYyM3WxvsmHOkQGgm5qKJBMdL1xlG-T2U9')
+    nlu = NaturalLanguageUnderstandingV1(
+        version='2022-04-07',
+        authenticator=authenticator
+    )
+
+    nlu.set_service_url('https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/f2965ae5-49b3-4a48-96fd-4c83a2f0992c')
+    
+    results = nlu.analyze(text=dealer_review,
+                          features=Features(entities=EntitiesOptions(emotion=True, sentiment=True, limit=2))).get_result()
+    #print(results)
+
+    return results["entities"]
+
 def get_request(url, **kwargs):
     print(kwargs)
     print("GET from {} ".format(url))
-    try:
+
         # Call get method of requests library with URL and parameters
-        response = requests.get(url, headers={'Content-Type': 'application/json'},
-                                    params=kwargs)
-    except:
-        # If any error occurs
-        print("Network exception occurred")
-    status_code = response.status_code
-    print("With status {} ".format(status_code))
+    params = dict()
+    params["text"] = kwargs["text"] if "text" in kwargs else ""
+    params["version"] = kwargs["version"] if "version" in kwargs else ""
+    params["features"] = kwargs["features"] if "features" in kwargs else ""
+    params["return_analyzed_text"] = kwargs["return_analyzed_text"] if "return_analyzed_text" in kwargs else ""
+    response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
+                                        auth=HTTPBasicAuth('apikey', kwargs["api_key"] if "api_key" in kwargs else ""))
+
+    #status_code = response.status_code
+    #print("With status {} ".format(status_code))
     json_data = json.loads(response.text)
     return json_data
 
@@ -67,11 +93,16 @@ def get_dealer_reviews_from_cf(url, **kwargs):
         for review in reviews:
             # Get its content in `doc` object
             # Create a CarDealer object with values in `doc` object
+            sentiment = analyze_review_sentiments(review["review"])
             review_obj = DealerReview(id=review["id"], dealership=review["dealership"], name=review["name"], 
                                       purchase=review["purchase"], review=review["review"], purchase_date=review["purchase_date"],
                                       car_make=review["car_make"], car_model=review["car_model"], car_year=review["car_year"], 
-                                      sentiment="hello")
+                                      sentiment=sentiment)
             results.append(review_obj)
+
+    print("---reviews---")
+    print(review_obj)
+    print("---reviews---")
 
     return results
 
