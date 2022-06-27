@@ -28,7 +28,7 @@ urlpatterns = [
     path(route='about', view=views.about, name='about'),
     path(route='contact', view=views.contact, name='contact'),
 
-    path('api/review', restapis.get_reviews_from_cf, name='review'),
+    path('dealer/<int:dealer_id>/', views.get_dealer_details, name='dealer_details'),
 
 
     # path for dealer reviews view

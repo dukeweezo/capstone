@@ -110,6 +110,17 @@ def get_dealerships(request):
         # Return a list of dealer short name
         return HttpResponse(dealer_names)
 
+def get_dealer_details(request, dealer_id):
+    if request.method == "GET":
+        str_id = str(dealer_id)
+        url = f'https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review?dealerId={str_id}'
+        # Get dealers from the URL
+        reviews = restapis.get_dealer_reviews_from_cf(url)
+        # Concat all dealer's short name
+        list_reviews = ' '.join([review.name for review in reviews])
+        # Return a list of dealer short name
+        return HttpResponse(list_reviews)
+
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
 # ...
