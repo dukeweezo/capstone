@@ -2,6 +2,7 @@ import requests
 import json
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 # import related models here
+from .models import CarDealer
 from requests.auth import HTTPBasicAuth
 from ibmcloudant.cloudant_v1 import AllDocsQuery, CloudantV1
 from ibm_cloud_sdk_core import ApiException
@@ -17,6 +18,43 @@ from urllib.parse import urlparse, parse_qs
 
 # Create a `post_request` to make HTTP POST requests
 # e.g., response = requests.post(url, params=kwargs, json=payload)
+import requests
+import json
+from .models import CarDealer
+from requests.auth import HTTPBasicAuth
+
+def get_request(url, **kwargs):
+    print(kwargs)
+    print("GET from {} ".format(url))
+    try:
+        # Call get method of requests library with URL and parameters
+        response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=kwargs)
+    except:
+        # If any error occurs
+        print("Network exception occurred")
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    return json_data
+
+def get_dealers_from_cf(url, **kwargs):
+    results = []
+    # Call get_request with a URL parameter
+    json_result = get_request(url)
+    if json_result:
+        # Get the row list in JSON as dealers
+        dealers = json_result["dealerships"]
+        # For each dealer object
+        for dealer in dealers:
+            # Get its content in `doc` object
+            # Create a CarDealer object with values in `doc` object
+            dealer_obj = CarDealer(address=dealer["address"], city=dealer["city"], full_name=dealer["full_name"],
+                                   id=dealer["id"], lat=dealer["lat"], long=dealer["long"], short_name=dealer["short_name"],                          
+                                   st=dealer["st"], zip=dealer["zip"])
+            results.append(dealer_obj)
+
+    return results
 
 def get_reviews_from_cf(request):
     incoming_query = urlparse(request.build_absolute_uri()).query
