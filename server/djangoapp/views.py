@@ -139,7 +139,15 @@ def add_review(request, dealer_id):
     if request.user.is_authenticated:
         review = {}
         json_payload = {}
+
+        review["car_make"] = "Audi"
+        review["car_model"] = "A6"
+        review["car_year"] = 2010
         review["dealership"] = dealer_id
+        review["name"] = "Adam Roberts"
+        review["purchase"] = True
+        review["purchase_date"] = datetime.utcnow().isoformat()
+        review["review"] = "Great car, though a little expensive."
 
         json_payload["review"] = review
         result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
