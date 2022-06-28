@@ -34,6 +34,18 @@ def contact(request):
     context = {}
     return render(request, 'djangoapp/contact.html', context)
 
+def is_authenticated_post_api_request(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['psw']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            return True
+        else:
+            return False
+    else:
+        return False
+
 def login_request(request):
     context = {}
     if request.method == "POST":
@@ -108,7 +120,10 @@ def get_dealerships(request):
         # Concat all dealer's short name
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
         # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        context = {}
+        context["dealer_names"] = dealer_names
+
+        return render(request, "djangoapp/index.html", context)
 
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
@@ -120,6 +135,17 @@ def get_dealer_details(request, dealer_id):
         list_reviews = ' '.join([review.name for review in reviews])
         # Return a list of dealer short name
         return HttpResponse(list_reviews)
+
+def add_review(request, dealer_id):
+    if is_authenticated_post_api_request(request):
+        review, json_payload = {}
+        review["dealership"] = dealer_id
+
+        json_payload["review"] = review
+        restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
+    else:
+        return JsonResponse({ "error": "Invalid credentials" })
+
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
