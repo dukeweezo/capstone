@@ -57,10 +57,9 @@ def login_request(request):
             return redirect('djangoapp:index')
         else:
             context['message'] = "Invalid username or password."
-            #return render(request, 'djangoapp/user_login_bootstrap.html', context)
+            return render(request, 'djangoapp/index.html', context)
     else:
-        print("???")
-        #return render(request, 'djangoapp/user_login_bootstrap.html', context)
+        return render(request, 'djangoapp/index.html', context)
 
 def logout_request(request):
     logout(request)
@@ -137,12 +136,14 @@ def get_dealer_details(request, dealer_id):
         return HttpResponse(list_reviews)
 
 def add_review(request, dealer_id):
-    if is_authenticated_post_api_request(request):
-        review, json_payload = {}
+    if request.user.is_authenticated:
+        review = {}
+        json_payload = {}
         review["dealership"] = dealer_id
 
         json_payload["review"] = review
-        restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
+        result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
+        return JsonResponse(result, safe=False)
     else:
         return JsonResponse({ "error": "Invalid credentials" })
 

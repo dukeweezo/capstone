@@ -65,7 +65,9 @@ def get_request(url, **kwargs):
     return json_data
 
 def post_request(url, json_payload, **kwargs):
-    requests.post(url, params=kwargs, json=json_payload)
+    response = requests.post(url, params=kwargs, json=json_payload)
+    json_data = json.loads(response.text)
+    return json_data
 
 def get_dealers_from_cf(url, **kwargs):
     results = []
