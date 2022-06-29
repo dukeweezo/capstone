@@ -41,6 +41,7 @@ def analyze_review_sentiments(dealer_review):
     nlu.set_service_url('https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/f2965ae5-49b3-4a48-96fd-4c83a2f0992c')
     
     results = nlu.analyze(text=dealer_review,
+                          language="en",
                           features=Features(entities=EntitiesOptions(emotion=True, sentiment=True, limit=2))).get_result()
     #print(results)
 
@@ -96,18 +97,18 @@ def get_dealer_reviews_from_cf(url, **kwargs):
         reviews = json_result["reviews"]
         # For each dealer object
         for review in reviews:
+            print('-----')
+            print(review)
+            print('-----')
+
             # Get its content in `doc` object
             # Create a CarDealer object with values in `doc` object
             sentiment = analyze_review_sentiments(review["review"])
-            review_obj = DealerReview(id=review["id"], dealership=review["dealership"], name=review["name"], 
+            review_obj = DealerReview(id=review["_id"], dealership=review["dealership"], name=review["name"], 
                                       purchase=review["purchase"], review=review["review"], purchase_date=review["purchase_date"],
                                       car_make=review["car_make"], car_model=review["car_model"], car_year=review["car_year"], 
                                       sentiment=sentiment)
             results.append(review_obj)
-
-    print("---reviews---")
-    print(review_obj)
-    print("---reviews---")
 
     return results
 
