@@ -30,7 +30,7 @@ urlpatterns = [
 
     path('dealer/<int:dealer_id>/', views.get_dealer_details, name='dealer_details'),
 
-    path('dealer/add/<int:dealer_id>/', views.add_review, name='add_review'),
+    path('review/<int:dealer_id>/', views.add_review, name='add_review'),
 
 
 

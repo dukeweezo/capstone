@@ -6,10 +6,6 @@
         {% include 'djangoapp/_head.html' %}
         <body>
             {% include 'djangoapp/_nav.html' %}
-
-            {% if user.is_authenticated %}
-                add_review
-            {% endif %}
             <div class="card-columns">
                 {% for review in reviews %}
                     <div class="card">
@@ -18,11 +14,16 @@
 
                         
                         <div class="card-body">
-                            {{review.car_make}}
+                            <p class="card-text"><strong>{{review.car_make}}, {{review.car_model}}</strong></p>
+                            <p class="card-text">{{review.year}}</p>
+                            <p class="card-text">{{review.review}}</p>
                         </div>
                     </div>
                 {% endfor %}
             </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'djangoapp:add_review' dealer_id %}" class="btn btn-info" role="button">Add a review</a>
+            {% endif %}
             
             
 

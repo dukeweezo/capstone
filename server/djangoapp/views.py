@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
+from .models import CarModel
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
 # from .restapis import related methods
@@ -131,6 +132,7 @@ def get_dealer_details(request, dealer_id):
         reviews = restapis.get_dealer_reviews_from_cf(url)
         context = {}
         context["reviews"] = reviews
+        context["dealer_id"] = dealer_id
 
         for review in reviews:
             print("-----")
@@ -141,24 +143,32 @@ def get_dealer_details(request, dealer_id):
         return render(request, 'djangoapp/dealer_details.html', context)
 
 def add_review(request, dealer_id):
-    if request.user.is_authenticated:
-        review = {}
-        json_payload = {}
+    if request.method == "GET":
+        context = {}
+        cars = CarModel.objects.all()
+        context["cars"] = cars
+        context["dealer_id"] = dealer_id
+        return render(request, 'djangoapp/add_review.html', context)
 
-        review["car_make"] = "Audi"
-        review["car_model"] = "A6"
-        review["car_year"] = 2010
-        review["dealership"] = dealer_id
-        review["name"] = "Adam Roberts"
-        review["purchase"] = True
-        review["purchase_date"] = datetime.utcnow().isoformat()
-        review["review"] = "Great car, though a little expensive."
+    elif request.method == "POST":
+        if request.user.is_authenticated:
+            review = {}
+            json_payload = {}
 
-        json_payload["review"] = review
-        result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
-        return JsonResponse(result, safe=False)
-    else:
-        return JsonResponse({ "error": "Invalid credentials" })
+            review["car_make"] = "Audi"
+            review["car_model"] = "A6"
+            review["car_year"] = 2010
+            review["dealership"] = dealer_id
+            review["name"] = "Adam Roberts"
+            review["purchase"] = True
+            review["purchase_date"] = datetime.utcnow().isoformat()
+            review["review"] = "Great car, though a little expensive."
+
+            json_payload["review"] = review
+            result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
+            return JsonResponse(result, safe=False)
+        else:
+            return JsonResponse({ "error": "Invalid credentials" })
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer

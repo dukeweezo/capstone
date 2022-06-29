@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    {% load static %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+    <html lang="en">
+        {% include 'djangoapp/_head.html' %}
+        <body>
+            {% include 'djangoapp/_nav.html' %}
+            <form action="{% url 'djangoapp:add_review' dealer_id %}" method="post">
+                <textarea class="form-control" id="review" name="review" rows="2" required></textarea>
+                
+                <label for="purchase">Did you purchase it?</label>
+                <input class="form-check-input" type="checkbox" name="purchase" id="purchase">
+                <br/>
+                <label for="car">Car model</label>
+                <select name="car" id="car" class="form-select" required>
+                    {% for car in cars %}
+                        <option selected value={{car.id}}>{{car.car_make.name}}-{{car.name}}-{{ car.year|date:"Y" }}</option>
+                    {% endfor %}
+                </select>
+                <input class="date-own form-control" type="text" name="year" id="year">
+                
+                <button class="btn btn-primary" type="submit">Submit review</button>
+            </form>
 
-</head>
-    <body>
-    <!--Add review form here -->
+           <!--Add review form here -->
     </body>
+
+    <script type="text/javascript">
+        $('.date-own').datepicker({
+           format: 'mm/dd/yyyy'
+         });
+    </script>
 </html>
