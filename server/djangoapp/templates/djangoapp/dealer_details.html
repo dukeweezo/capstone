@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dealership Review</title>
     {% load static %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
 
-    <body>
+    <html lang="en">
+        {% include 'djangoapp/_head.html' %}
+        <body>
+            {% include 'djangoapp/_nav.html' %}
+
+            {% if user.is_authenticated %}
+                add_review
+            {% endif %}
+            <div class="card-columns">
+                {% for review in reviews %}
+                    <div class="card">
+
+                        <img width="30px" class="card-img-left" src="/media/emoji/{{review.sentiment}}.png" class="card-img-left">
+
+                        
+                        <div class="card-body">
+                            {{review.car_make}}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            
 
     <!--Add a nav bar here -->
 

@@ -11,7 +11,7 @@ from dotenv import dotenv_values
 from django.conf import settings
 from urllib.parse import urlparse, parse_qs
 from ibm_watson import NaturalLanguageUnderstandingV1
-from ibm_watson.natural_language_understanding_v1 import Features, EntitiesOptions, KeywordsOptions
+from ibm_watson.natural_language_understanding_v1 import Features, SentimentOptions, KeywordsOptions
 
 # Create a `get_request` to make HTTP GET requests
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
@@ -26,12 +26,6 @@ from .models import CarDealer
 from requests.auth import HTTPBasicAuth
 
 def analyze_review_sentiments(dealer_review):
-    """
-    results = get_request(text=dealer_review,
-                url="https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/f2965ae5-49b3-4a48-96fd-4c83a2f0992c",
-                api_key="TwRA5GvEKIaYyM3WxvsmHOkQGgm5qKJBMdL1xlG-T2U9",
-                version="2022-04-07")
-    """
     authenticator = IAMAuthenticator('TwRA5GvEKIaYyM3WxvsmHOkQGgm5qKJBMdL1xlG-T2U9')
     nlu = NaturalLanguageUnderstandingV1(
         version='2022-04-07',
@@ -39,13 +33,12 @@ def analyze_review_sentiments(dealer_review):
     )
 
     nlu.set_service_url('https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/f2965ae5-49b3-4a48-96fd-4c83a2f0992c')
-    
+
     results = nlu.analyze(text=dealer_review,
                           language="en",
-                          features=Features(entities=EntitiesOptions(emotion=True, sentiment=True, limit=2))).get_result()
-    #print(results)
+                          features=Features(sentiment=SentimentOptions(document=True))).get_result()
 
-    return results["entities"]
+    return results["sentiment"]["document"]["label"]
 
 def get_request(url, **kwargs):
     print(kwargs)
@@ -60,8 +53,6 @@ def get_request(url, **kwargs):
     response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
                                         auth=HTTPBasicAuth('apikey', kwargs["api_key"] if "api_key" in kwargs else ""))
 
-    #status_code = response.status_code
-    #print("With status {} ".format(status_code))
     json_data = json.loads(response.text)
     return json_data
 
@@ -72,15 +63,10 @@ def post_request(url, json_payload, **kwargs):
 
 def get_dealers_from_cf(url, **kwargs):
     results = []
-    # Call get_request with a URL parameter
     json_result = get_request(url)
     if json_result:
-        # Get the row list in JSON as dealers
         dealers = json_result["dealerships"]
-        # For each dealer object
         for dealer in dealers:
-            # Get its content in `doc` object
-            # Create a CarDealer object with values in `doc` object
             dealer_obj = CarDealer(address=dealer["address"], city=dealer["city"], full_name=dealer["full_name"],
                                    id=dealer["id"], lat=dealer["lat"], long=dealer["long"], short_name=dealer["short_name"],                          
                                    st=dealer["st"], zip=dealer["zip"])
@@ -90,24 +76,18 @@ def get_dealers_from_cf(url, **kwargs):
 
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
-    # Call get_request with a URL parameter
     json_result = get_request(url)
     if json_result:
-        # Get the row list in JSON as dealers
         reviews = json_result["reviews"]
-        # For each dealer object
         for review in reviews:
-            print('-----')
-            print(review)
-            print('-----')
-
             # Get its content in `doc` object
             # Create a CarDealer object with values in `doc` object
             sentiment = analyze_review_sentiments(review["review"])
+
             review_obj = DealerReview(id=review["_id"], dealership=review["dealership"], name=review["name"], 
                                       purchase=review["purchase"], review=review["review"], purchase_date=review["purchase_date"],
                                       car_make=review["car_make"], car_model=review["car_model"], car_year=review["car_year"], 
-                                      sentiment=sentiment)
+                                      sentiment=sentiment if sentiment else 'no-sentiment')
             results.append(review_obj)
 
     return results
