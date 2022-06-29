@@ -43,11 +43,46 @@ class DealerReview:
 
 # Create your models here.
 
-# <HINT> Create a Car Make model `class CarMake(models.Model)`:
-# - Name
-# - Description
-# - Any other fields you would like to include in car make model
-# - __str__ method to print a car make object
+class CarMake(models.Model):
+    name = models.CharField(null=False, max_length=60)
+    description = models.TextField()
+    
+    def __str__(self):
+        return self.name
+
+class CarModel(models.Model):
+    car_make = models.ForeignKey(CarMake, on_delete=models.CASCADE)
+    dealer_id = models.IntegerField(null=False)
+    name = models.CharField(null=False, max_length=60)
+
+    SEDAN = 'sedan'
+    SUV = 'suv'
+    WAGON = 'wagon'
+    HATCHBACK = 'hatchback'
+    MINIVAN = 'minivan'
+    PICKUP_TRUCK = 'pickup'
+    SUPERCAR = 'supercar'
+    CAR_TYPE_CHOICES = [
+        (SEDAN, 'Sedan'),
+        (SUV, 'SUV'),
+        (WAGON, 'Station Wagon'),
+        (HATCHBACK, 'Hatchback'),
+        (MINIVAN, 'Minivan'),
+        (PICKUP_TRUCK, 'Pickup Truck'),
+        (SUPERCAR, 'Supercar')
+    ]
+
+    car_type = models.CharField(
+        null=False,
+        max_length=20,
+        choices=CAR_TYPE_CHOICES,
+        default=SUPERCAR
+    )
+
+    year = models.DateField(null=False)
+    
+    def __str__(self):
+        return self.name
 
 
 # <HINT> Create a Car Model model `class CarModel(models.Model):`:
