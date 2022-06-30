@@ -148,10 +148,46 @@ def add_review(request, dealer_id):
         cars = CarModel.objects.all()
         context["cars"] = cars
         context["dealer_id"] = dealer_id
+
         return render(request, 'djangoapp/add_review.html', context)
 
     elif request.method == "POST":
-        if request.user.is_authenticated:
+        if 1 == 1:
+            name = request.user.get_full_name()
+            name = name if name else request.user.username
+
+            car_model = CarModel.objects.get(id=request.POST["car"])
+
+            purchase = False
+            if "purchase" in request.POST.keys():
+                purchase = True
+            
+            purchase_date = datetime.strptime(request.POST["year"], '%m/%d/%Y').isoformat()
+
+            print("purchase_date")
+            print(purchase_date)
+            review = {}
+            json_payload = {}
+
+            review["car_make"] = car_model.car_make.name
+            review["car_model"] = car_model.name
+            review["car_year"] = str(car_model.year)
+            review["dealership"] = dealer_id
+            review["name"] = name
+            review["purchase"] = purchase
+            review["purchase_date"] = str(purchase_date)
+            review["review"] = request.POST["review"]
+
+            json_payload["review"] = review
+
+            #json_payload = json.dumps(json_payload, indent = 4, sort_keys = True, default = str)
+            print(json_payload)
+
+            result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
+            return JsonResponse(result, safe=False)
+
+
+        elif 1 == 2:
             review = {}
             json_payload = {}
 
@@ -164,9 +200,11 @@ def add_review(request, dealer_id):
             review["purchase_date"] = datetime.utcnow().isoformat()
             review["review"] = "Great car, though a little expensive."
 
+
             json_payload["review"] = review
-            result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
-            return JsonResponse(result, safe=False)
+            print(json_payload)
+            #result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
+            return JsonResponse(json_payload, safe=False)
         else:
             return JsonResponse({ "error": "Invalid credentials" })
 
