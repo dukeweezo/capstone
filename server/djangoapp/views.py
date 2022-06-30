@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from .models import CarModel
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
 # from .restapis import related methods
@@ -181,10 +182,9 @@ def add_review(request, dealer_id):
             json_payload["review"] = review
 
             #json_payload = json.dumps(json_payload, indent = 4, sort_keys = True, default = str)
-            print(json_payload)
 
             result = restapis.post_request('https://ca3ab0e1.us-south.apigw.appdomain.cloud/api/review', json_payload)
-            return JsonResponse(result, safe=False)
+            return HttpResponseRedirect(reverse(viewname='djangoapp:dealer_details', args=(dealer_id,)))
 
 
         elif 1 == 2:

@@ -5,25 +5,34 @@
     <html lang="en">
         {% include 'djangoapp/_head.html' %}
         <body>
+            
             {% include 'djangoapp/_nav.html' %}
-            <div class="card-columns">
-                {% for review in reviews %}
-                    <div class="card">
+            <div class="container-fluid px-5">
+                <div class="row gx-20 pt-3">
+                    <div class="card-columns">
+                        {% for review in reviews %}
+                            <div class="card">
 
-                        <img width="30px" class="card-img-left" src="/media/emoji/{{review.sentiment}}.png" class="card-img-left">
+                                <img width="30px" class="card-img-left" src="/media/emoji/{{review.sentiment}}.png" class="card-img-left">
 
-                        
-                        <div class="card-body">
-                            <p class="card-text"><strong>{{review.car_make}}, {{review.car_model}}</strong></p>
-                            <p class="card-text">{{review.year}}</p>
-                            <p class="card-text">{{review.review}}</p>
-                        </div>
+                                
+                                <div class="card-body">
+                                    <p class="card-text"><strong>{{review.car_make}}, {{review.car_model}}</strong></p>
+                                    <p class="card-text"><strong>{{review.car_year|slice:":4"}}</strong></p>
+                                    <p class="card-text">{{review.review}}</p>
+                                    <p class="card-text">- {{review.name}}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                </div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'djangoapp:add_review' dealer_id %}" class="btn btn-info" role="button">Add a review</a>
+                {% endif %}
+                <br/>
+                <br/>
+                <br/>
             </div>
-            {% if user.is_authenticated %}
-                <a href="{% url 'djangoapp:add_review' dealer_id %}" class="btn btn-info" role="button">Add a review</a>
-            {% endif %}
             
             
 
